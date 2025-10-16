@@ -1,0 +1,136 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #74ABE2, #5563DE);
+  color: #222;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+header h1 {
+  color: #2e4bd1;
+  margin-bottom: 10px;
+}
+
+header p {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.resumo {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.card {
+  flex: 1;
+  background: #f5f7ff;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card h3 {
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+.card p {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.card.receita { border-left: 6px solid #2ecc71; }
+.card.despesa { border-left: 6px solid #e74c3c; }
+.card.saldo   { border-left: 6px solid #3498db; }
+
+.nova-transacao {
+  margin-bottom: 30px;
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input, select, button {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+button {
+  background-color: #5563DE;
+  color: white;
+  font-weight: 600;
+  border: none;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background-color: #2e4bd1;
+  cursor: pointer;
+}
+
+.lista ul {
+  list-style: none;
+  padding: 0;
+}
+
+.lista li {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 5px solid transparent;
+}
+
+.lista li.receita { border-left-color: #2ecc71; }
+.lista li.despesa { border-left-color: #e74c3c; }
+
+.lista button {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.grafico {
+  margin-top: 30px;
+}
+
+footer {
+  text-align: center;
+  color: white;
+  margin: 20px 0;
+}

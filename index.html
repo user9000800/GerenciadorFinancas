@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gerenciador Financeiro — Futurista</title>
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --bg:#06070a; /* deep space */
+      --card:#0f1724; /* card base */
+      --glass: rgba(255,255,255,0.04);
+      --accent-1: #6ff3ff; /* cyan */
+      --accent-2: #9b7bff; /* violet */
+      --accent-3: #00ffd5;
+      --muted: #9aa3b2;
+      --danger: #ff6b6b;
+      --success: #39d98a;
+      --glass-border: rgba(255,255,255,0.06);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Poppins,system-ui,Segoe UI,Roboto,Helvetica,Arial; background: radial-gradient(1200px 600px at 10% 10%, rgba(106,22,255,0.08), transparent),
+      linear-gradient(180deg,#05060a 0%, #08101a 100%); color:#dbe7ff}
+
+    .app{
+      max-width:1100px;margin:32px auto;padding:28px;border-radius:16px;overflow:hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow: 0 10px 30px rgba(2,6,23,0.7);
+      border: 1px solid rgba(255,255,255,0.02);
+      display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start
+    }
+
+    /* SIDEBAR */
+    .sidebar{padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);backdrop-filter: blur(6px);border:1px solid var(--glass-border)}
+    .brand{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+    .logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent-1),var(--accent-2));display:flex;align-items:center;justify-content:center;font-family:Orbitron;color:#021;box-shadow:0 6px 18px rgba(107,90,255,0.12)}
+    h1.title{font-family:Orbitron;font-size:18px;margin:0}
+    p.tag{margin:0;color:var(--muted);font-size:13px}
+
+    .summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+    .card{padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.012),transparent);border:1px solid var(--glass-border)}
+    .card h3{font-size:13px;margin:0 0 6px 0;color:var(--muted)}
+    .card p{font-size:16px;margin:0;font-weight:600}
+
+    .add-area{margin-top:18px}
+    .field{display:flex;flex-direction:column;margin-bottom:10px}
+    .field label{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .field input,.field select{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit;outline:none}
+    .btn{display:inline-flex;gap:8px;align-items:center;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+    .btn.primary{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#021}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+
+    .controls{display:flex;gap:8px;align-items:center;margin-top:8px}
+
+    /* MAIN */
+    .main{padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid var(--glass-border)}
+    .top-row{display:flex;justify-content:space-between;align-items:center}
+    .page-title{font-family:Orbitron;font-size:20px;margin:0}
+    .search{display:flex;gap:8px;align-items:center}
+    .search input{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+
+    /* VISUALS */
+    .visuals{display:grid;grid-template-columns:1fr 320px;gap:16px;margin-top:18px}
+    .panel{padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);border:1px solid var(--glass-border)}
+    canvas{width:100% !important;height:260px !important}
+
+    /* EXTRATO */
+    .extrato{margin-top:14px}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    thead th{font-size:12px;color:var(--muted);text-align:left;padding:10px 6px}
+    tbody td{padding:10px 6px;border-top:1px dashed rgba(255,255,255,0.03)}
+    .tag-receita{color:var(--success);font-weight:600}
+    .tag-despesa{color:var(--danger);font-weight:600}
+
+    .actions{display:flex;gap:8px}
+    .small{font-size:12px;padding:6px 8px;border-radius:8px}
+
+    footer{grid-column:1/-1;text-align:center;padding-top:12px;color:var(--muted);font-size:13px}
+
+    /* Responsiveness */
+    @media (max-width:900px){
+      .app{grid-template-columns:1fr; padding:16px}
+      .visuals{grid-template-columns:1fr}
+      canvas{height:200px !important}
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">GF</div>
+        <div>
+          <h1 class="title">Gerenciador Futurista</h1>
+          <p class="tag">Controle inteligente das suas finanças</p>
+        </div>
+      </div>
+
+      <div class="summary-cards">
+        <div class="card">
+          <h3>Receitas</h3>
+          <p id="total-receitas">R$ 0,00</p>
+        </div>
+        <div class="card">
+          <h3>Despesas</h3>
+          <p id="total-despesas">R$ 0,00</p>
+        </div>
+      </div>
+
+      <div class="card add-area">
+        <h3 style="margin-bottom:8px">Adicionar transação</h3>
+        <div class="field">
+          <label for="descricao">Descrição</label>
+          <input id="descricao" type="text" placeholder="Ex: Salário, Netflix...">
+        </div>
+        <div class="field">
+          <label for="valor">Valor (R$)</label>
+          <input id="valor" type="number" placeholder="0.00" step="0.01">
+        </div>
+        <div class="field">
+          <label for="tipo">Tipo</label>
+          <select id="tipo">
+            <option value="receita">Receita</option>
+            <option value="despesa">Despesa</option>
+          </select>
+        </div>
+        <div class="controls">
+          <button id="adicionar" class="btn primary">➕ Adicionar</button>
+          <button id="exportar" class="btn ghost small">⤓ Exportar CSV</button>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;font-size:13px;color:var(--muted)">
+        <p style="margin:0 0 6px 0">Dica: clique no valor para editar rápido.</p>
+        <p style="margin:0">Total do saldo:</p>
+        <div class="card" style="margin-top:10px">
+          <h3>Saldo</h3>
+          <p id="saldo">R$ 0,00</p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="top-row">
+        <h2 class="page-title">Visão Geral</h2>
+        <div class="search">
+          <input id="busca" placeholder="Procurar por descrição...">
+          <select id="filtro-tipo" style="padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:inherit">
+            <option value="todos">Todos</option>
+            <option value="receita">Receitas</option>
+            <option value="despesa">Despesas</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="visuals">
+        <div class="panel">
+          <canvas id="grafico"></canvas>
+        </div>
+
+        <div class="panel">
+          <h3 style="margin:0 0 10px 0">Resumo rápido</h3>
+          <p style="margin:0 0 8px 0;color:var(--muted)">Composição entre receitas e despesas</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <div style="flex:1">
+              <h4 style="margin:0;font-size:14px;color:var(--muted)">Receitas</h4>
+              <p id="mini-receitas" style="margin:6px 0 0 0;font-weight:700">R$ 0,00</p>
+            </div>
+            <div style="flex:1">
+              <h4 style="margin:0;font-size:14px;color:var(--muted)">Despesas</h4>
+              <p id="mini-despesas" style="margin:6px 0 0 0;font-weight:700">R$ 0,00</p>
+            </div>
+          </div>
+
+          <div style="margin-top:14px">
+            <button id="limpar" class="btn ghost small">🧹 Limpar todas</button>
+            <button id="simular" class="btn ghost small">🔮 Simular mês</button>
+          </div>
+        </div>
+
+        <div style="grid-column:1/-1" class="extrato panel">
+          <h3 style="margin-top:0">Extrato</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div style="color:var(--muted);font-size:13px">Lista de transações armazenadas</div>
+            <div>
+              <button id="ordenar-valor" class="btn ghost small">⇅ Ordenar valor</button>
+            </div>
+          </div>
+
+          <div style="overflow:auto;max-height:320px">
+            <table id="tabela-extrato" aria-live="polite">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Descrição</th>
+                  <th>Tipo</th>
+                  <th>Valor</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="lista-transacoes"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <footer>Feito por Alex Amorim • Interface futurista</footer>
+    </main>
+  </div>
+
+  <script>
+    // ====== Dados e elementos ======
+    let transacoes = [];
+
+    const descricaoInput = document.getElementById('descricao');
+    const valorInput = document.getElementById('valor');
+    const tipoSelect = document.getElementById('tipo');
+    const lista = document.getElementById('lista-transacoes');
+    const saldoEl = document.getElementById('saldo');
+    const totalReceitas = document.getElementById('total-receitas');
+    const totalDespesas = document.getElementById('total-despesas');
+    const botaoAdicionar = document.getElementById('adicionar');
+    const graficoCanvas = document.getElementById('grafico');
+    const buscar = document.getElementById('busca');
+    const filtroTipo = document.getElementById('filtro-tipo');
+    const miniReceitas = document.getElementById('mini-receitas');
+    const miniDespesas = document.getElementById('mini-despesas');
+
+    let grafico = null;
+
+    // Formatação local de moeda (pt-BR)
+    const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    // ======= Eventos =======
+    botaoAdicionar.addEventListener('click', () => {
+      adicionarTransacao();
+    });
+
+    // tecla Enter no campo valor também adiciona
+    valorInput.addEventListener('keydown', e => { if(e.key === 'Enter') adicionarTransacao(); });
+
+    buscar.addEventListener('input', atualizarLista);
+    filtroTipo.addEventListener('change', atualizarLista);
+
+    document.getElementById('limpar').addEventListener('click', () => {
+      if(confirm('Remover todas as transações?')){ transacoes = []; salvarLocalStorage(); atualizarInterface(); }
+    });
+
+    document.getElementById('exportar').addEventListener('click', exportarCSV);
+    document.getElementById('ordenar-valor').addEventListener('click', () => { transacoes.sort((a,b)=>b.valor-a.valor); salvarLocalStorage(); atualizarInterface(); });
+
+    // Simulação simples: adiciona um mês padrão
+    document.getElementById('simular').addEventListener('click', ()=>{
+      const salario = parseFloat(prompt('Valor do salário (R$):', '2500')) || 0;
+      transacoes.push({descricao:'Salário (simulado)', valor:salario, tipo:'receita', data: new Date().toISOString()});
+      transacoes.push({descricao:'Aluguel (simulado)', valor:800, tipo:'despesa', data: new Date().toISOString()});
+      transacoes.push({descricao:'Supermercado (simulado)', valor:400, tipo:'despesa', data: new Date().toISOString()});
+      salvarLocalStorage(); atualizarInterface();
+    });
+
+    // ======= CRUD localStorage =======
+    function salvarLocalStorage(){ localStorage.setItem('transacoes_v2', JSON.stringify(transacoes)); }
+    function carregarLocalStorage(){ const dados = localStorage.getItem('transacoes_v2'); if(dados){ transacoes = JSON.parse(dados); } }
+
+    // ======= Adicionar / remover / editar =======
+    function adicionarTransacao(){
+      const descricao = descricaoInput.value.trim();
+      const valor = parseFloat(valorInput.value);
+      const tipo = tipoSelect.value;
+      if(!descricao || isNaN(valor) || valor <= 0){ alert('Preencha todos os campos corretamente!'); return; }
+      const t = { descricao, valor: Number(valor.toFixed(2)), tipo, data: new Date().toISOString() };
+      transacoes.unshift(t); // adiciona no topo
+      descricaoInput.value = '';
+      valorInput.value = '';
+      salvarLocalStorage();
+      atualizarInterface();
+    }
+
+    function removerTransacao(index){
+      if(!confirm('Remover essa transação?')) return;
+      transacoes.splice(index,1);
+      salvarLocalStorage();
+      atualizarInterface();
+    }
+
+    // Edita um valor ao clicar
+    function editarTransacaoValor(index){
+      const atual = transacoes[index];
+      const novo = prompt('Novo valor (R$):', atual.valor);
+      const v = parseFloat(novo);
+      if(!isNaN(v) && v>0){ transacoes[index].valor = Number(v.toFixed(2)); salvarLocalStorage(); atualizarInterface(); }
+    }
+
+    // ======= Lista & Resumo =======
+    function atualizarInterface(){ atualizarLista(); atualizarResumo(); atualizarGrafico(); }
+
+    function atualizarLista(){
+      const termo = buscar.value.trim().toLowerCase();
+      const filtro = filtroTipo.value;
+      lista.innerHTML = '';
+      transacoes.forEach((t,idx) => {
+        if(filtro !== 'todos' && t.tipo !== filtro) return;
+        if(termo && !t.descricao.toLowerCase().includes(termo)) return;
+
+        const tr = document.createElement('tr');
+        const dataTD = document.createElement('td');
+        const d = new Date(t.data || Date.now());
+        dataTD.textContent = d.toLocaleDateString();
+
+        const descTD = document.createElement('td');
+        descTD.textContent = t.descricao;
+
+        const tipoTD = document.createElement('td');
+        tipoTD.innerHTML = t.tipo === 'receita' ? '<span class="tag-receita">Receita</span>' : '<span class="tag-despesa">Despesa</span>';
+
+        const valorTD = document.createElement('td');
+        const btnValor = document.createElement('button');
+        btnValor.className = 'small';
+        btnValor.style.cursor = 'pointer';
+        btnValor.textContent = fmt.format(t.valor);
+        btnValor.title = 'Clique para editar';
+        btnValor.onclick = () => editarTransacaoValor(idx);
+        valorTD.appendChild(btnValor);
+
+        const acoesTD = document.createElement('td');
+        const btnRem = document.createElement('button');
+        btnRem.className = 'small';
+        btnRem.textContent = '❌';
+        btnRem.onclick = () => removerTransacao(idx);
+        acoesTD.appendChild(btnRem);
+
+        tr.appendChild(dataTD);
+        tr.appendChild(descTD);
+        tr.appendChild(tipoTD);
+        tr.appendChild(valorTD);
+        tr.appendChild(acoesTD);
+
+        lista.appendChild(tr);
+      });
+    }
+
+    function atualizarResumo(){
+      const receitas = transacoes.filter(t=>t.tipo==='receita').reduce((acc,t)=>acc+t.valor,0);
+      const despesas = transacoes.filter(t=>t.tipo==='despesa').reduce((acc,t)=>acc+t.valor,0);
+      const saldo = receitas - despesas;
+
+      totalReceitas.textContent = fmt.format(receitas);
+      totalDespesas.textContent = fmt.format(despesas);
+      saldoEl.textContent = fmt.format(saldo);
+      miniReceitas.textContent = fmt.format(receitas);
+      miniDespesas.textContent = fmt.format(despesas);
+    }
+
+    // ======= Gráfico =======
+    function atualizarGrafico(){
+      const receitas = transacoes.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
+      const despesas = transacoes.filter(t=>t.tipo==='despesa').reduce((a,t)=>a+t.valor,0);
+
+      if(grafico) grafico.destroy();
+
+      grafico = new Chart(graficoCanvas.getContext('2d'),{
+        type:'doughnut',
+        data:{
+          labels:['Receitas','Despesas'],
+          datasets:[{ data:[receitas,despesas],
+            backgroundColor:[ 'rgba(107,248,255,0.95)','rgba(155,123,255,0.95)'],
+            hoverOffset:8
+          }]
+        },
+        options: {
+          responsive:true,
+          plugins:{
+            legend:{position:'bottom',labels:{color:'#cfe7ff'}},
+            tooltip:{callbacks:{label:ctx=> ctx.dataset.label ? ctx.dataset.label + ': ' + fmt.format(ctx.parsed) : fmt.format(ctx.parsed) }}
+          }
+        }
+      });
+    }
+
+    // ======= Export CSV =======
+    function exportarCSV(){
+      if(!transacoes.length){ alert('Nenhuma transação para exportar.'); return; }
+      const cabecalho = ['data','descricao','tipo','valor'];
+      const linhas = transacoes.map(t => [t.data, '"'+t.descricao.replace(/"/g,'""')+'"', t.tipo, t.valor]);
+      const csv = [cabecalho, ...linhas].map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'extrato_financeiro.csv'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    // ======= Inicialização =======
+    carregarLocalStorage();
+    atualizarInterface();
+  </script>
+</body>
+</html>
